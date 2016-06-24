@@ -1,11 +1,10 @@
 function lexer_t(text){
-    _this = this;
-    _this.text = text.toLowerCase();
-    _this.text_idx = 0;
-    _this.tokens = [];
-    _this.add_token(['hey'], 'HEY');
-    _this.add_token(['left'], 'DIRECTION');
-    _this.add_token(['right'], 'DIRECTION');
+    this.text = text.toLowerCase();
+    this.text_idx = 0;
+    this.tokens = [];
+    this.add_token(['hey'], 'HEY');
+    this.add_token(['left'], 'DIRECTION');
+    this.add_token(['right'], 'DIRECTION');
 }
 
 lexer_t.prototype.add_token = function(list, ret){
@@ -19,7 +18,7 @@ lexer_t.prototype.add_token = function(list, ret){
     this.tokens.push({expected_texts: list, token_return: ret});
 }
 
-lexer_t.prototype.get_lexeme = function(){
+lexer_t.prototype.get_next = function(){
     var lexeme = {}
     old_idx = this.text_idx;
     while(this.text[this.text_idx] != ' ' && this.text_idx < this.text.length) this.text_idx++;
@@ -27,9 +26,7 @@ lexer_t.prototype.get_lexeme = function(){
     lexeme.token = this.get_token(lexeme.text);
 
     this.text_idx++;
-
     return lexeme;
-
 }
 
 lexer_t.prototype.get_token = function(text){

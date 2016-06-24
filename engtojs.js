@@ -9,4 +9,3 @@ function engparser_t(text){
     _this.add_token(['left'], 'DIRECTION');
     _this.add_token(['right'], 'DIRECTION');
 }
-
