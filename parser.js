@@ -34,6 +34,12 @@ parser_t.prototype._expect_text = function(expected_text, expected_token){
 
 //returns the "compiled" js from english
 parser_t.prototype.parse = function(){
+    var program = {text: "", execute: false};
+    if(this._parse_salutation())
+        program.execute = true;
+    while(!this.lexer.finished()){
+        program += this._parse_command();
+    }
 }
 
 parser_t.prototype.command = function(){
@@ -56,6 +62,11 @@ parser_t.prototype.alert = function(){
 }
 
 parser_t.prototype.drive_action = function(){
+    this._expect("DRIVE");
+
+    if(this._accept("DIRECTION")){
+        //could be a direction only, or a distance as well       
+    }
 }
 
 parser_t.prototype.turn_action = function(){

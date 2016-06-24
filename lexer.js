@@ -1,14 +1,26 @@
-function lexer_t(text){
-    this.text = text.toLowerCase();
-    this.text_idx = 0;
-    this.tokens = [];
-    this.add_token(['hey'], 'HEY');
-    this.add_token(['left'], 'DIRECTION');
-    this.add_token(['right'], 'DIRECTION');
+lexer_t.prototype.valid_tokens = new Set(['HEY', 'ROBOT_NICK', 'DIRECTION', 'ACTION', 'DISTANCE', 'UNIT']);
+
+function lexer_t(text, opts){
+    _this = this;
+    _this.text = text.toLowerCase();
+    _this.text_idx = 0;
+    _this.tokens = [];
+    _this.add_token(['hey'], 'HEY');
+    _this.add_token(['robot'], 'ROBOT_NICK');
+    _this.add_token(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
+    _this.add_token(['drive'], 'ACTION');
+}
+
+lexer_t.prototype[Symbol.iterator] = function*(){
+    while(!this.finished()){
+        yield this.get_lexeme();
+    }
 }
 
 lexer_t.prototype.add_token = function(list, ret){
-    for(t of this.tokens){
+    if(this.valid_tokens.has(ret))
+        return;
+    for(var t of this.tokens){
         if(t.token_return == ret){
             for(i of list)
                 t.expected_texts.push(i);
