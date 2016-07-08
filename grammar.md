@@ -19,7 +19,6 @@ ACTION: DRIVE_ACTION
 
 DRIVE_ACTION: drive DIRECTION DISTANCE
             | drive DISTANCE DIRECTION
-            | drive DISTANCE
 
 TURN_ACTION: turn DIRECTION ANGLE
            | turn ANGLE DIRECTION
@@ -30,6 +29,7 @@ DIRECTION: forward
          | right
          | back
          | backwards
+         |
 
 ANGLE: NUMBER degrees
      | NUMBER radians
