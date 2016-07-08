@@ -17,19 +17,26 @@ ALERT: hey ROBOT_NAME
 ACTION: DRIVE_ACTION
       | TURN_ACTION
 
-DRIVE_ACTION: drive DIRECTION DISTANCE
-            | drive DISTANCE DIRECTION
-            | drive DISTANCE
+DRIVE_ACTION: drive DRIVE_SPECS
 
-TURN_ACTION: turn DIRECTION ANGLE
-           | turn ANGLE DIRECTION
-           | turn DIRECTION
+TURN_ACTION: turn TURN_SPECS
 
-DIRECTION: forward
-         | left
-         | right
-         | back
-         | backwards
+DRIVE_SPECS: DRIVE_DIRECTION DISTANCE
+           | DISTANCE DRIVE_DIRECTION
+
+DRIVE_DIRECTION: forward
+               | backwards
+               | left
+               | right
+
+TURN_SPECS: ANGLE TURN_DIRECTION
+          | TURN_DIRECTION ANGLE
+          | ANGLE
+          | DIRECTION
+
+SHARED_DIRECTION: left
+                | right
+                | backwards
 
 ANGLE: NUMBER degrees
      | NUMBER radians
