@@ -11,18 +11,12 @@ recognition.maxAlternatives = 1;
 
 var daig = document.querySelector('.output');
 
-document.body.onclick = function(){
-    console.log("starting recognition");
-    recognition.start();
-}
 
 recognition.onresult = function(event){
-    console.log(event.results);
     var speech_transcript = event.results[0][0].transcript;
-    var lexer = new lexer_t(speech_transcript);
-    while(!lexer.finished()){
-        console.log(lexer.get_lexeme());
-    }
+    console.log(speech_transcript);
+    var parser = new parser_t(speech_transcript, "robot");
+    parser.parse();
 }
 
 recognition.onspeechend = function(){

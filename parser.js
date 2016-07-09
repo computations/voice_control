@@ -1,11 +1,15 @@
 function parser_t(text, robot_name){
-    this.lexer = new lexer_t(text);
-    this.lexeme = this.lexer.get_next();
     this.robot_name = robot_name || "robot";
+    this.lexer = new lexer_t(text, {robot_nick: robot_name});
+    console.log(this.lexer.tokens);
+    this.lexeme = this.lexer.get_next();
+    this.program = {};
+    this.program.execute = false;
+    this.program.text = '';
 }
 
 parser_t.prototype._next = function(){
-    this.lexeme = lexer.get_next();
+    this.lexeme = this.lexer.get_next();
 }
 
 parser_t.prototype._accept = function(expected_token){
@@ -20,7 +24,7 @@ parser_t.prototype._accept = function(expected_token){
 parser_t.prototype._expect = function(expected_token){
     var tmp = this._accept(expected_token);
     if(tmp) return tmp;
-    throw "Unexpected token";
+    throw "Expected token not found: {expected token: " + expected_token + "," + " current token:" + this.lexeme.token + " }";
 }
 
 parser_t.prototype._accept_text = function(expected_text, expected_token){
@@ -33,32 +37,39 @@ parser_t.prototype._accept_text = function(expected_text, expected_token){
 
 parser_t.prototype._expect_text = function(expected_text, expected_token){
     if(this._accept_text(expected_text, expected_token)) return true;
-    throw "Unexpected token";
+    throw "Unexpected token: {" + expected_text + "," + expected_token + "}";
     return false;
 }
 
 //returns the "compiled" js from english
 parser_t.prototype.parse = function(){
-    var program = {text: "", execute: false};
-    if(this._parse_salutation())
-        program.execute = true;
-    while(!this.lexer.finished()){
-        program += this._parse_command();
-    }
+    if(this.salutation())
+        this.program.execute = true;
+    //while(!this.lexer.finished()){
+        this.command();
+    //}
+}
+
+parser_t.prototype.salutation = function(){
+    this._expect("HEY");
+    this._expect("ROBOT_NICK");
+    return true;
 }
 
 parser_t.prototype.command = function(){
-    this.alert();
     this.action();
 }
 
 parser_t.prototype.action = function(){
-    if(this._accept("DRIVE")){
-        this.drive_action();
+    if(this._accept_text("drive", "ACTION")){
+        this.drive_specs();
+        return
     }
-    else if(this._accept("TURN")){
-        this.turn_action();
+    else if(this._accept_text("turn", "ACTION")){
+        this.turn_specs();
+        return
     }
+    throw "Did not find expected token";
 }
 
 parser_t.prototype.alert = function(){
@@ -73,9 +84,22 @@ parser_t.prototype.drive_specs = function(){
         drive_params.direction = lexeme_text;
     }
     if(lexeme_text = this._accept("DISTANCE")){
-        drive_specs.distance = lexeme_text;
+        drive_params.distance = this.distance_convert(lexeme_text);
         if(!drive_params.direction)
             drive_params.direction = this._expect("DIRECTION")
+    }
+
+    this.make_drive_command(drive_params);
+}
+
+parser_t.prototype.make_drive_command = function(drive_params){
+    if(drive_params.distance){
+        this.program.text += drive_params.direction + "(" + drive_params + ");\n";
+    }
+    else{
+        if(drive_params.direction != 'forward')
+            this.program.text += drive_params.direction + "(90)\n";
+        this.program.text += "drive(10,10)";
     }
 }
 

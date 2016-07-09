@@ -6,20 +6,18 @@ function lexer_t(text, opts){
     _this.text_idx = 0;
     _this.tokens = [];
     _this.add_token(['hey'], 'HEY');
-    _this.add_token(['robot'], 'ROBOT_NICK');
+    _this.add_token([opts.robot_nick || 'robot'], 'ROBOT_NICK');
     _this.add_token(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
     _this.add_token(['drive'], 'ACTION');
 }
 
 lexer_t.prototype[Symbol.iterator] = function*(){
     while(!this.finished()){
-        yield this.get_lexeme();
+        yield this.get_next();
     }
 }
 
 lexer_t.prototype.add_token = function(list, ret){
-    if(this.valid_tokens.has(ret))
-        return;
     for(var t of this.tokens){
         if(t.token_return == ret){
             for(i of list)
