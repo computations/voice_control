@@ -4,7 +4,7 @@ function parser_t(text, robot_name){
     this.robot_name = robot_name || "robot";
 }
 
-parser_t.prototype._next(){
+parser_t.prototype._next = function(){
     this.lexeme = lexer.get_next();
 }
 
@@ -81,18 +81,19 @@ parser_t.prototype.drive_specs = function(){
 
 parser_t.prototype.turn_specs = function(){
     var lexeme_text;
-    var turn_params;
+    var turn_params = {};
     if(lexeme_text = this._accept("ANGLE")){
         turn_params.angle = lexeme_text;
     }
     if(lexeme_text = this._accept("TURN_DIRECTION")){
         turn_params.direction = lexeme_text;
-        if(!turn_params.angle && lexeme_text = this._accept("ANGLE")){
+        if(!turn_params.angle && (lexeme_text = this._accept("ANGLE"))){
             turn_params.angle = lexeme_text;
         }
     }
-    if(!turn_params && lexeme_text._accept("DIRECTION")){
-
+    if((!turn_params.angle && !turn_params.direction) 
+            && (lexeme_text = this._accept("DIRECTION"))){
+        turn_params.direction = lexeme_text;
     }
 }
 

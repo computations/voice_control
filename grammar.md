@@ -34,9 +34,10 @@ TURN_SPECS: ANGLE TURN_DIRECTION
           | ANGLE
           | DIRECTION
 
-SHARED_DIRECTION: left
-                | right
-                | backwards
+TURN_DIRECTION: left
+              | right
+              | backwards
+              | around
 
 ANGLE: NUMBER degrees
      | NUMBER radians
