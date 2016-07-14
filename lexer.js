@@ -9,6 +9,12 @@ function lexer_t(text, opts){
     _this.add_token([opts.robot_nick || 'robot'], 'ROBOT_NICK');
     _this.add_token(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
     _this.add_token(['drive'], 'ACTION');
+    _this.add_token([/[0-9]+/], 'NUMBER', parse_number);
+}
+
+lexer_t.prototype.parse_number = function(){
+    var tmp_text = this.lexeme.text;
+
 }
 
 lexer_t.prototype[Symbol.iterator] = function*(){
@@ -17,7 +23,7 @@ lexer_t.prototype[Symbol.iterator] = function*(){
     }
 }
 
-lexer_t.prototype.add_token = function(list, ret){
+lexer_t.prototype.add_token = function(list, ret, callback){
     for(var t of this.tokens){
         if(t.token_return == ret){
             for(i of list)
@@ -25,27 +31,36 @@ lexer_t.prototype.add_token = function(list, ret){
             return;
         }
     }
-    this.tokens.push({expected_texts: list, token_return: ret});
+    this.tokens.push({expected_texts: list, token_return: ret, callback: callback});
+}
+
+lexer_t.prototype.get_text = function(){
+    old_idx = this.text_idx;
+    while(this.text[this.text_idx] != ' ' && this.text_idx < this.text.length) this.text_idx++;
+    return this.text.slice(old_idx, this.text_idx);
 }
 
 lexer_t.prototype.get_next = function(){
-    var lexeme = {}
-    old_idx = this.text_idx;
-    while(this.text[this.text_idx] != ' ' && this.text_idx < this.text.length) this.text_idx++;
-    lexeme.text = this.text.slice(old_idx, this.text_idx);
-    lexeme.token = this.get_token(lexeme.text);
+    this.lexeme = {}
+    
+    this.lexeme.text = this.get_text();
+    this.lexeme.token = this.get_token(lexeme.text);
 
     this.text_idx++;
-    return lexeme;
+    return this.lexeme;
 }
 
 lexer_t.prototype.get_token = function(text){
+    if(text == '') return 'NULL';
     for(t of this.tokens){
         for(et of t.expected_texts){
-            if(et == text) return t.token_return;
+            var res = tex.match(et);
+            if(res[0].length == res.input.length){ 
+                if(t.callback) t.callback();
+                return t.token_return;
+            }
         }
     }
-    if(text == '') return 'NULL';
     return 'ID';
 }
 

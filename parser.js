@@ -24,7 +24,8 @@ parser_t.prototype._accept = function(expected_token){
 parser_t.prototype._expect = function(expected_token){
     var tmp = this._accept(expected_token);
     if(tmp) return tmp;
-    throw "Expected token not found: {expected token: " + expected_token + "," + " current token:" + this.lexeme.token + " }";
+    throw "Expected token not found: {expected token: " + expected_token + "," + " current token:" + this.lexeme.token + " }"
+        + " current text: " + this.lexeme.text;
 }
 
 parser_t.prototype._accept_text = function(expected_text, expected_token){
