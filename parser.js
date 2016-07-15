@@ -46,9 +46,12 @@ parser_t.prototype._expect_text = function(expected_text, expected_token){
 parser_t.prototype.parse = function(){
     if(this.salutation())
         this.program.execute = true;
-    //while(!this.lexer.finished()){
+    while(!this.lexer.finished()){
         this.command();
-    //}
+        if(!this.lexer.finished()){
+            this._expect("THEN");
+        }
+    }
 }
 
 parser_t.prototype.salutation = function(){
@@ -70,7 +73,7 @@ parser_t.prototype.action = function(){
         this.turn_specs();
         return
     }
-    throw "Did not find expected token";
+    throw "Did not find expected token: {" + this.lexeme.text + "}";
 }
 
 parser_t.prototype.alert = function(){
@@ -84,23 +87,19 @@ parser_t.prototype.drive_specs = function(){
     if(lexeme_text = this._accept("DIRECTION")){
         drive_params.direction = lexeme_text;
     }
-    if(lexeme_text = this._accept("DISTANCE")){
-        drive_params.distance = this.distance_convert(lexeme_text);
-        if(!drive_params.direction)
-            drive_params.direction = this._expect("DIRECTION")
-    }
+    drive_params.distance = this.parse_distance();
 
     this.make_drive_command(drive_params);
 }
 
 parser_t.prototype.make_drive_command = function(drive_params){
     if(drive_params.distance){
-        this.program.text += drive_params.direction + "(" + drive_params + ");\n";
+        this.program.text += drive_params.direction + "(" + drive_params.distance + ");\n";
     }
     else{
         if(drive_params.direction != 'forward')
-            this.program.text += drive_params.direction + "(90)\n";
-        this.program.text += "drive(10,10)";
+            this.program.text += drive_params.direction + "(90);\n";
+        this.program.text += "drive(10,10);\n";
     }
 }
 
@@ -120,6 +119,37 @@ parser_t.prototype.turn_specs = function(){
             && (lexeme_text = this._accept("DIRECTION"))){
         turn_params.direction = lexeme_text;
     }
+    this.make_turn_command(turn_params);
+}
+
+parser_t.prototype.make_turn_command = function(turn_params){
+    if(turn_params.direction){
+        this.program.text += turn_params.direction + "(";
+        if(turn_params.angle){
+            this.program.text += turn_params.angle + ");\n";
+        }
+        else{
+            this.program.text += "90);\n";
+        }
+    }
+}
+
+//eventually, this needs to be MUCH smarter 
+parser_t.prototype.parse_number = function(){
+    return this._accept("NUMBER");
+}
+
+parser_t.prototype.parse_distance = function(){
+    if(num = this.parse_number()){
+        var dist_unit = this._accept("DISTANCE_UNIT").toLowerCase();
+        if(dist_unit == 'meter'){
+            num*=100;
+        }
+        console.log(num, dist_unit);
+        return num;
+    }
+    else 
+        return;
 }
 
 parser_t.prototype.direction_parse = function(direction_text){

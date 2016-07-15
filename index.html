@@ -5,10 +5,7 @@
         <script src="parser.js" type="text/javascript"> </script>
    </head> 
     <body>
-        <div>
-            <p class="output"><em> ...diag msg </em> </p>
-        </div> 
-        <textarea id='parse_input'>hey robot drive forward</textarea>
+        <textarea id='parse_input'>hey luke drive forward</textarea>
         <button onclick="var parser = new parser_t(document.getElementById('parse_input').value, 'luke'); parser.parse(); console.log(parser.program);"> click to parse </button>
     </body> 
     <script src="interface.js" type="text/javascript"> </script>

@@ -8,13 +8,18 @@ function lexer_t(text, opts){
     _this.add_token(['hey'], 'HEY');
     _this.add_token([opts.robot_nick || 'robot'], 'ROBOT_NICK');
     _this.add_token(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
-    _this.add_token(['drive'], 'ACTION');
-    _this.add_token([/[0-9]+/], 'NUMBER', parse_number);
+    _this.add_token(['drive', 'turn'], 'ACTION');
+    _this.add_token(['then'], 'THEN');
+    _this.add_token([/[0-9]+/], 'NUMBER');
+    _this.add_token([/(?:centi)?meters?/], "DISTANCE_UNIT", this.clean_distance_unit);
 }
 
-lexer_t.prototype.parse_number = function(){
-    var tmp_text = this.lexeme.text;
-
+lexer_t.prototype.clean_distance_unit = function(lex){
+    //remove the plural from the unit, just makes code more readable later
+    if(lex.text.slice(-1) == 's'){
+        lex.text = lex.text.slice(0,-1);
+    }
+    return lex;
 }
 
 lexer_t.prototype[Symbol.iterator] = function*(){
@@ -41,27 +46,29 @@ lexer_t.prototype.get_text = function(){
 }
 
 lexer_t.prototype.get_next = function(){
-    this.lexeme = {}
+    lexeme = {}
     
-    this.lexeme.text = this.get_text();
-    this.lexeme.token = this.get_token(lexeme.text);
+    lexeme.text = this.get_text();
+    lexeme = this.get_token(lexeme);
 
     this.text_idx++;
-    return this.lexeme;
+    return lexeme;
 }
 
-lexer_t.prototype.get_token = function(text){
-    if(text == '') return 'NULL';
+lexer_t.prototype.get_token = function(lexeme){
+    if(lexeme.text == '') return 'NULL';
     for(t of this.tokens){
         for(et of t.expected_texts){
-            var res = tex.match(et);
-            if(res[0].length == res.input.length){ 
-                if(t.callback) t.callback();
-                return t.token_return;
+            var res = lexeme.text.match(et);
+            if(res && res[0].length == res.input.length){ 
+                if(t.callback) lexeme = t.callback(lexeme);
+                lexeme.token = t.token_return;
+                return lexeme;
             }
         }
     }
-    return 'ID';
+    lexeme.token = 'ID';
+    return lexeme;
 }
 
 lexer_t.prototype.finished = function(){
