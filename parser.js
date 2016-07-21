@@ -1,7 +1,7 @@
 function parser_t(text, robot_name){
     this.robot_name = robot_name || "robot";
     this.lexer = new lexer_t(text, {robot_nick: robot_name});
-    console.log(this.lexer.tokens);
+    //console.log(this.lexer.tokens);
     this.lexeme = this.lexer.get_next();
     this.program = {};
     this.program.execute = false;
@@ -144,6 +144,12 @@ parser_t.prototype.parse_distance = function(){
         var dist_unit = this._accept("DISTANCE_UNIT").toLowerCase();
         if(dist_unit == 'meter'){
             num*=100;
+        }
+        else if(dist_unit == 'inch'){
+            num*=2.54;
+        }
+        else if(dist_unit == 'foot'){
+            num*=2.54*12.0;
         }
         console.log(num, dist_unit);
         return num;

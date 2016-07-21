@@ -116,8 +116,9 @@ function preprocessor_t(){
 }
 
 preprocessor_t.prototype.preprocess = function(text){
-    this.text = text.replace('-',' ');
-    this.text = text.split(' ');
+    this.text = text.toLowerCase();
+    this.text = this.text.replace('-',' ');
+    this.text = this.text.split(' ');
     for(var i=0;i<this.text.length;++i){
         if(this.number_parser.is_number(this.text[i])){
             var j;
@@ -130,4 +131,3 @@ preprocessor_t.prototype.preprocess = function(text){
 
 var pp = new preprocessor_t();
 
-console.log(pp.preprocess("hello there three thousand"));

@@ -2,7 +2,8 @@ lexer_t.prototype.valid_tokens = new Set(['HEY', 'ROBOT_NICK', 'DIRECTION', 'ACT
 
 function lexer_t(text, opts){
     _this = this;
-    _this.text = text.toLowerCase();
+    this.preprocessor = new preprocessor_t();
+    _this.text = this.preprocessor.preprocess(text);
     _this.text_idx = 0;
     _this.tokens = [];
     _this.add_token(['hey'], 'HEY');
@@ -11,11 +12,18 @@ function lexer_t(text, opts){
     _this.add_token(['drive', 'turn'], 'ACTION');
     _this.add_token(['then'], 'THEN');
     _this.add_token([/[0-9]+/], 'NUMBER');
-    _this.add_token([/(?:centi)?meters?/], "DISTANCE_UNIT", this.clean_distance_unit);
+    _this.add_token([/(?:centi)?meters?/, /inch(?:es)?/, 'feet', 'foot'], "DISTANCE_UNIT", this.clean_distance_unit);
 }
 
 lexer_t.prototype.clean_distance_unit = function(lex){
     //remove the plural from the unit, just makes code more readable later
+    //also, turn inches into inch
+    if(lex.text == 'inches'){
+        lex.text = 'inch';
+    }
+    if(lex.text == 'feet'){
+        lex.text = 'foot';
+    }
     if(lex.text.slice(-1) == 's'){
         lex.text = lex.text.slice(0,-1);
     }
