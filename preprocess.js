@@ -126,6 +126,7 @@ preprocessor_t.prototype.preprocess = function(text){
             this.text.splice(i, j-i,this.number_parser.parse(this.text.slice(i,j)));
         }
     }
+    console.log(this.text);
     return this.text.join(' ');
 }
 

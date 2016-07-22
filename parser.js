@@ -106,19 +106,10 @@ parser_t.prototype.make_drive_command = function(drive_params){
 parser_t.prototype.turn_specs = function(){
     var lexeme_text;
     var turn_params = {};
-    if(lexeme_text = this._accept("ANGLE")){
-        turn_params.angle = lexeme_text;
-    }
-    if(lexeme_text = this._accept("TURN_DIRECTION")){
-        turn_params.direction = lexeme_text;
-        if(!turn_params.angle && (lexeme_text = this._accept("ANGLE"))){
-            turn_params.angle = lexeme_text;
-        }
-    }
-    if((!turn_params.angle && !turn_params.direction) 
-            && (lexeme_text = this._accept("DIRECTION"))){
+    if(lexeme_text = this._accept("DIRECTION")){
         turn_params.direction = lexeme_text;
     }
+    turn_params.angle = this.parse_angle();
     this.make_turn_command(turn_params);
 }
 
@@ -132,16 +123,59 @@ parser_t.prototype.make_turn_command = function(turn_params){
             this.program.text += "90);\n";
         }
     }
+    else if(turn_params.angle){
+        this.program.text += "right("+turn_params.angle+")";
+    }
 }
 
-//eventually, this needs to be MUCH smarter 
+parser_t.prototype.parse_expression = function(){
+    return this.parse_term();
+}
 parser_t.prototype.parse_number = function(){
-    return this._accept("NUMBER");
+    var num = this._accept("NUMBER") ;
+    while(tmp = this._accept("NUMBER")){
+        num*=10;
+        num+=tmp;
+    }
+    var pi_part = this._accept("PI") || this._accept("TAU") || 0;
+    if(pi_part && num) num *= pi_part;
+    else if(pi_part) num = pi_part;
+    return num;
+}
+
+parser_t.prototype.parse_factor = function(){
+    var num = this.parse_number();
+    while(true){
+        if(this._accept("DIVIDE")){
+            num /= this.parse_number();
+        }
+        else if(this._accept("MULTIPLY")){
+            num *= this.parse_number();
+        }
+        else{
+            return num;
+        }
+    }
+}
+
+parser_t.prototype.parse_term = function(){
+    var num = this.parse_factor();
+    while(true){
+        if(this._accept("ADD")){
+            num += this.parse_factor();
+        }
+        else if(this._accept("SUBTRACT")){
+            num -= this.parse_factor();
+        }
+        else{
+            return num;
+        }
+    }
 }
 
 parser_t.prototype.parse_distance = function(){
-    if(num = this.parse_number()){
-        var dist_unit = this._accept("DISTANCE_UNIT").toLowerCase();
+    if(num = this.parse_expression()){
+        var dist_unit = this._accept("DISTANCE_UNIT");
         if(dist_unit == 'meter'){
             num*=100;
         }
@@ -158,8 +192,14 @@ parser_t.prototype.parse_distance = function(){
         return;
 }
 
-parser_t.prototype.direction_parse = function(direction_text){
-    return direction_text;
+parser_t.prototype.parse_angle = function(){
+    if(num = this.parse_expression()){
+        var angle_unit = this._accept("ANGLE_UNIT");
+        if(angle_unit == 'radians'){
+            num = (num*180)/(Math.PI);
+        }
+    }
+    return num;
 }
 
 parser_t.prototype.distance_convert = function(distance_text){

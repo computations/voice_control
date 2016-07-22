@@ -5,13 +5,19 @@ function lexer_t(text, opts){
     this.preprocessor = new preprocessor_t();
     _this.text = this.preprocessor.preprocess(text);
     _this.text_idx = 0;
+    _this.keywords = {};
     _this.tokens = [];
-    _this.add_token(['hey'], 'HEY');
-    _this.add_token([opts.robot_nick || 'robot'], 'ROBOT_NICK');
-    _this.add_token(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
-    _this.add_token(['drive', 'turn'], 'ACTION');
-    _this.add_token(['then'], 'THEN');
-    _this.add_token([/[0-9]+/], 'NUMBER');
+    _this.add_keywords(['hey'], 'HEY');
+    _this.add_keywords([opts.robot_nick || 'robot'], 'ROBOT_NICK');
+    _this.add_keywords(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
+    _this.add_keywords(['drive', 'turn'], 'ACTION');
+    _this.add_keywords(['then'], 'THEN');
+    _this.add_keywords(['pi'], 'PI', function(lexeme){lexeme.text = Math.PI; return lexeme});
+    _this.add_keywords(['tau'], 'TAU', function(lexeme){lexeme.text = Math.PI*2; return lexeme;});
+    _this.add_keywords(['radians', 'degrees'], 'ANGLE_UNIT');
+    _this.add_keywords(['over'], 'DIVIDE');
+
+    _this.add_token([/[0-9]+(?:.[0-9]+)?/], 'NUMBER');
     _this.add_token([/(?:centi)?meters?/, /inch(?:es)?/, 'feet', 'foot'], "DISTANCE_UNIT", this.clean_distance_unit);
 }
 
@@ -33,6 +39,12 @@ lexer_t.prototype.clean_distance_unit = function(lex){
 lexer_t.prototype[Symbol.iterator] = function*(){
     while(!this.finished()){
         yield this.get_next();
+    }
+}
+
+lexer_t.prototype.add_keywords = function(list, ret, callback){
+    for(kw of list){
+        this.keywords[kw] = {token_return:ret, callback:callback};
     }
 }
 
@@ -60,11 +72,17 @@ lexer_t.prototype.get_next = function(){
     lexeme = this.get_token(lexeme);
 
     this.text_idx++;
+    console.log(lexeme);
     return lexeme;
 }
 
 lexer_t.prototype.get_token = function(lexeme){
     if(lexeme.text == '') return 'NULL';
+    if(lexeme.text in this.keywords){
+        lexeme.token = this.keywords[lexeme.text].token_return;
+        if(this.keywords[lexeme.text].callback){ lexeme = this.keywords[lexeme.text].callback(lexeme)}
+        return lexeme;
+    }
     for(t of this.tokens){
         for(et of t.expected_texts){
             var res = lexeme.text.match(et);
