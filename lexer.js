@@ -12,6 +12,7 @@ function lexer_t(text, opts){
     _this.add_keywords(['left', 'right', 'forward', 'backwards'], 'DIRECTION');
     _this.add_keywords(['drive', 'turn'], 'ACTION');
     _this.add_keywords(['then'], 'THEN');
+    _this.add_keywords(['and'], 'THEN');
     _this.add_keywords(['pi'], 'PI', function(lexeme){lexeme.text = Math.PI; return lexeme});
     _this.add_keywords(['tau'], 'TAU', function(lexeme){lexeme.text = Math.PI*2; return lexeme;});
     _this.add_keywords(['radians', 'degrees'], 'ANGLE_UNIT');

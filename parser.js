@@ -50,6 +50,7 @@ parser_t.prototype.parse = function(){
         this.command();
         if(!this.lexer.finished()){
             this._expect("THEN");
+            while(this._accept("THEN")){}
         }
     }
 }
@@ -82,11 +83,6 @@ parser_t.prototype.action = function(){
         return
     }
     throw "Did not find expected token: {" + this.lexeme.text + "}";
-}
-
-parser_t.prototype.alert = function(){
-    this._expect("HEY");
-    this._expect_text(this.robot_name, "ID");
 }
 
 parser_t.prototype.drive_specs = function(){
