@@ -57,6 +57,14 @@ parser_t.prototype.parse = function(){
 parser_t.prototype.salutation = function(){
     this._expect("HEY");
     this._expect("ROBOT_NICK");
+    //get rid of that stupid human politness
+    //who cares if its gramatical
+    while(
+        this._accept_text("can", "ID")  ||
+        this._accept_text("could", "ID")|| 
+        this._accept_text("will", "ID")|| 
+        this._accept_text("you", "ID")  ||
+        this._accept_text("please", "ID")){}
     return true;
 }
 
