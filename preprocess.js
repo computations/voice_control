@@ -1,36 +1,6 @@
-var reduce= function(state_machine){
-    //console.log(state_machine);
-    if(typeof(state_machine) == 'number') return state_machine;
-    if(Object.keys(state_machine).length == 1)
-        for(key in state_machine)
-            return state_machine[key];
-    var substate = {};
-    //console.log(state_machine);
-    for(key in state_machine){
-        if(key){
-            if(!substate[key[0]]) substate[key[0]] = {};
-            substate[key[0]][key.slice(1)] = state_machine[key];
-        }
-        else{
-            substate[key] = state_machine[key];
-            
-        }
-    }
-    for(key in substate){
-        substate[key] = reduce(substate[key]);
-    }
-    return substate;
-};
-
 var make_lexer = function(states){
     return function(word){
-        var state_machine = reduce(states);
-        for(var index = 0;index< word.length; index++){
-            if(state_machine[word[index]] === undefined) break;
-            state_machine = state_machine[word[index]];
-            if(typeof(state_machine) == 'number') return state_machine;
-        }
-        return state_machine[''];
+        return states[word];
     }
 };
 
