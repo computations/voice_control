@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="preprocess.js" type="text/javascript"> </script>
-        <script src="lexer.js" type="text/javascript"> </script>
-        <script src="parser.js" type="text/javascript"> </script>
+        <script src="vc.js" type="text/javascript"> </script>
    </head> 
     <body>
         <textarea id='parse_input'>hey luke turn pi radians</textarea>
         <button onclick="var parser = new parser_t(document.getElementById('parse_input').value, 'luke'); parser.parse(); console.log(parser.program);"> click to parse </button>
     </body> 
-    <script src="interface.js" type="text/javascript"> </script>
 </html>
